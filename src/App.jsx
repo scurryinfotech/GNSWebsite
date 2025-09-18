@@ -8,9 +8,11 @@ import CartModal from "./components/CartModal";
 import TableSelectionModal from "./components/TableSelectionModal";
 import StickyCartButton from "./components/StickyCartButton.jsx";
 import Loader from "./components/Loader.jsx";
+import OrderHistory from './components/OrderHistory';
 import { useLocation } from "react-router-dom";
  import { ToastContainer, toast } from 'react-toastify';
  import "react-toastify/dist/ReactToastify.css";
+
 
 const RestaurantApp = () => {
   const [categories, setCategories] = useState([]);
@@ -24,6 +26,9 @@ const RestaurantApp = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+   const [showOrderHistory, setShowOrderHistory] = useState(false);
+  // const [customerName, setCustomerName] = useState("");
+  // const [userPhone, setUserPhone] = useState("");
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -31,56 +36,59 @@ const RestaurantApp = () => {
 
   // ---- Place Order ----
   // -----Toastify is used for better user experience------
-  const handlePlaceOrder = async () => {
-    try {
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+ const handlePlaceOrder = async ({ customerName, userPhone }) => {
+  try {
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
 
-      if (!token) {
-        alert("User not authenticated");
-        return;
-      }
-      if (!selectedTable) {
-        alert("Please select a table");
-        return;
-      }
-
-      const orderData = {
-        selectedTable:
-          selectedTable.TableNo ||
-          selectedTable.tableNo ||
-          selectedTable.id ||
-          selectedTable,
-        userName: 2,
-        orderItems: cart.map((item) => ({
-          price: item.price,
-          item_id: parseInt(item.id),
-          full: item.size === "full" ? item.quantity : 0,
-          half: item.size === "half" ? item.quantity : 0,
-        })),
-      };
-      // console.log("📤 Sending order to API:", orderData);
-
-      await axios.post(
-        "https://localhost:7104/api/Order/Post",
-        orderData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-     toast.success("Order placed successfully!");
-      
-      setCart([]);
-      setShowCart(false);
-    } catch (error) {
-      // console.error("❌ Failed to place order:",error.response?.data || error.message);
-      toast.error("Failed to place order. Please try again."+error.message);  
+    if (!token) {
+      toast.error("User not authenticated");
+      return;
     }
-  };
+    if (!selectedTable) {
+      toast.error("Please select a table");
+      return;
+    }
+
+    const orderData = {
+      selectedTable:
+        selectedTable.TableNo ||
+        selectedTable.tableNo ||
+        selectedTable.id ||
+        selectedTable,
+        userName:2,
+      customerName,  // ✅ from user input
+      userPhone,     // ✅ from user input
+      orderItems: cart.map((item) => ({
+        price: item.price,
+        item_id: parseInt(item.id),
+        full: item.size === "full" ? item.quantity : 0,
+        half: item.size === "half" ? item.quantity : 0,
+      })),
+    };
+
+    await axios.post("https://localhost:7104/api/Order/Post", orderData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    toast.success("Order placed successfully!");
+    setCart([]);
+    setShowCart(false);
+  } catch (error) {
+    toast.error("Failed to place order. " + error.message);
+  }
+};
+const handleOrderHistoryClick = () => {
+  if (!selectedTable) {
+    toast.error("Please select a table first");
+    setShowTableSelection(true);
+    return;
+  }
+  setShowOrderHistory(true);
+};
+
 
   // ---- Fetch Data ----
   useEffect(() => {
@@ -159,7 +167,7 @@ const RestaurantApp = () => {
     if (tableFromURL) {
       setSelectedTable(tableFromURL);
       setShowTableSelection(false);
-      console.log("✅ Table auto-selected:", tableFromURL);
+
     }
   }, [tableFromURL]);
 
@@ -359,6 +367,7 @@ useEffect(() => {
             />
           </div>
 
+
           {showCart && (
             <CartModal
               cart={cart}
@@ -368,6 +377,8 @@ useEffect(() => {
               handlePlaceOrder={handlePlaceOrder}
               selectedTable={selectedTable}
               setShowCart={setShowCart}
+              //   setCustomerName={setCustomerName}
+              // setUserPhone={setUserPhone}
             />
           )}
 
@@ -378,9 +389,23 @@ useEffect(() => {
             />
           )}
 
+          {/* ✅ Order History Modal */}
+          {showOrderHistory && (
+            <OrderHistory
+              selectedTable={selectedTable}
+              onClose={() => setShowOrderHistory(false)}
+              tableNo={selectedTable} 
+              // orderId={generatedOrderId} 
+            />
+          )}
+
+
           <StickyCartButton
+            // itemCount={getCartItemCount()}
             itemCount={getCartItemCount()}
             onClick={() => setShowCart(true)}
+            onOrderHistoryClick={handleOrderHistoryClick}
+            
           />
           
           <ToastContainer position="top-right" autoClose={3000} />
