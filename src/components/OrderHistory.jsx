@@ -88,22 +88,22 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
     return statusMap[status] || "Unknown";
   };
 
-  const getExpectedTime = (status) => {
-    switch (status) {
-      case 1: return "Waiting for confirmation";
-      case 2: return "10-15 minutes";
-      case 3: return "Served";
-      case 4: return "Cancelled";
-      default: return "N/A";
-    }
-  };
+  // const getExpectedTime = (status) => {
+  //   switch (status) {
+  //     case 1: return "Waiting for confirmation";
+  //     case 2: return "5-10 minutes";
+  //     case 3: return "Served";
+  //     case 4: return "Cancelled";
+  //     default: return "N/A";
+  //   }
+  // };
 
-  const getTimeLabel = (status) => {
-    switch (status) {
-      case 2: return "Expected Time: ";
-      default: return "Status: ";
-    }
-  };
+  // const getTimeLabel = (status) => {
+  //   switch (status) {
+  //     case 2: return "Expected Time: ";
+  //     default: return "Status: ";
+  //   }
+  // };
 
   const calculateTotalPrice = (order) => {
     const basePrice = order.price || 0;
@@ -200,7 +200,7 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
                         {order.itemName || "Item Name"}, {formatPortionText(order)}
                       </h2>
                       
-                      <p className="text-sm text-gray-500 mt-1">
+                      {/* <p className="text-sm text-gray-500 mt-1">
                         {getTimeLabel(status)}
                         <span className={
                           status === 2 
@@ -209,7 +209,7 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
                         }>
                           {getExpectedTime(status)}
                         </span>
-                      </p>
+                      </p> */}
                       
                       <p className="text-sm font-medium text-green-600 mt-1">
                         Price: ₹{calculateTotalPrice(order)}

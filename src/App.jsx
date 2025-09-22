@@ -8,11 +8,11 @@ import CartModal from "./components/CartModal";
 import TableSelectionModal from "./components/TableSelectionModal";
 import StickyCartButton from "./components/StickyCartButton.jsx";
 import Loader from "./components/Loader.jsx";
-import OrderHistory from './components/OrderHistory';
+import OrderHistory from "./components/OrderHistory";
 import { useLocation } from "react-router-dom";
- import { ToastContainer, toast } from 'react-toastify';
- import "react-toastify/dist/ReactToastify.css";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import HomeDelivery from "./components/HomeDelivery";
 
 const RestaurantApp = () => {
   const [categories, setCategories] = useState([]);
@@ -26,7 +26,8 @@ const RestaurantApp = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-   const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [showHomeDelivery, setShowHomeDelivery] = useState(false);
   // const [customerName, setCustomerName] = useState("");
   // const [userPhone, setUserPhone] = useState("");
 
@@ -36,59 +37,59 @@ const RestaurantApp = () => {
 
   // ---- Place Order ----
   // -----Toastify is used for better user experience------
- const handlePlaceOrder = async ({ customerName, userPhone }) => {
-  try {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+  const handlePlaceOrder = async ({ customerName, userPhone }) => {
+    try {
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
 
-    if (!token) {
-      toast.error("User not authenticated");
-      return;
+      if (!token) {
+        toast.error("User not authenticated");
+        return;
+      }
+      if (!selectedTable) {
+        toast.error("Please select a table");
+        return;
+      }
+
+      const orderData = {
+        selectedTable:
+          selectedTable.TableNo ||
+          selectedTable.tableNo ||
+          selectedTable.id ||
+          selectedTable,
+        userName: 2,
+        customerName, // ✅ from user input
+        userPhone, // ✅ from user input
+        orderItems: cart.map((item) => ({
+          price: item.price,
+          item_id: parseInt(item.id),
+          full: item.size === "full" ? item.quantity : 0,
+          half: item.size === "half" ? item.quantity : 0,
+        })),
+      };
+
+      await axios.post("https://localhost:7104/api/Order/Post", orderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Order placed successfully!");
+      setCart([]);
+      setShowCart(false);
+    } catch (error) {
+      toast.error("Failed to place order. " + error.message);
     }
+  };
+  const handleOrderHistoryClick = () => {
     if (!selectedTable) {
-      toast.error("Please select a table");
+      toast.error("Please select a table first");
+      setShowTableSelection(true);
       return;
     }
-
-    const orderData = {
-      selectedTable:
-        selectedTable.TableNo ||
-        selectedTable.tableNo ||
-        selectedTable.id ||
-        selectedTable,
-        userName:2,
-      customerName,  // ✅ from user input
-      userPhone,     // ✅ from user input
-      orderItems: cart.map((item) => ({
-        price: item.price,
-        item_id: parseInt(item.id),
-        full: item.size === "full" ? item.quantity : 0,
-        half: item.size === "half" ? item.quantity : 0,
-      })),
-    };
-
-    await axios.post("https://localhost:7104/api/Order/Post", orderData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    toast.success("Order placed successfully!");
-    setCart([]);
-    setShowCart(false);
-  } catch (error) {
-    toast.error("Failed to place order. " + error.message);
-  }
-};
-const handleOrderHistoryClick = () => {
-  if (!selectedTable) {
-    toast.error("Please select a table first");
-    setShowTableSelection(true);
-    return;
-  }
-  setShowOrderHistory(true);
-};
-
+    setShowOrderHistory(true);
+  };
 
   // ---- Fetch Data ----
   useEffect(() => {
@@ -162,12 +163,11 @@ const handleOrderHistoryClick = () => {
   }, []);
 
   // Auto select table from URL
-  
+
   useEffect(() => {
     if (tableFromURL) {
       setSelectedTable(tableFromURL);
       setShowTableSelection(false);
-
     }
   }, [tableFromURL]);
 
@@ -211,16 +211,16 @@ const handleOrderHistoryClick = () => {
         it.categoryName?.toLowerCase().includes(lowerSearch)
     );
   }, [subcategories, menuItems, categoryMap, searchTerm]);
-useEffect(() => {
-  if (searchTerm.trim()) {
-    // Open all categories (or filter to just the matching one if you want)
-    const expanded = {};
-    categories.forEach(cat => {
-      expanded[cat.categoryId] = true;
-    });
-    setExpandedCategories(expanded);
-  }
-}, [searchTerm, categories]);
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      // Open all categories (or filter to just the matching one if you want)
+      const expanded = {};
+      categories.forEach((cat) => {
+        expanded[cat.categoryId] = true;
+      });
+      setExpandedCategories(expanded);
+    }
+  }, [searchTerm, categories]);
   // Grouped items for MenuList
   const groupedItemsForList = useMemo(() => {
     const grouped = {};
@@ -320,7 +320,11 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-white relative scroll-smooth">
-      <Header getCartItemCount={getCartItemCount} setShowCart={setShowCart} />
+      <Header
+        getCartItemCount={getCartItemCount}
+        setShowCart={setShowCart}
+        onDeliveryClick={() => setShowHomeDelivery(true)}
+      />
 
       {isLoading ? (
         <Loader />
@@ -367,7 +371,6 @@ useEffect(() => {
             />
           </div>
 
-
           {showCart && (
             <CartModal
               cart={cart}
@@ -389,25 +392,27 @@ useEffect(() => {
             />
           )}
 
+          {showHomeDelivery && (
+            <HomeDelivery onClose={() => setShowHomeDelivery(false)} />
+          )}
+
           {/* ✅ Order History Modal */}
           {showOrderHistory && (
             <OrderHistory
               selectedTable={selectedTable}
               onClose={() => setShowOrderHistory(false)}
-              tableNo={selectedTable} 
-              // orderId={generatedOrderId} 
+              tableNo={selectedTable}
+              // orderId={generatedOrderId}
             />
           )}
-
 
           <StickyCartButton
             // itemCount={getCartItemCount()}
             itemCount={getCartItemCount()}
             onClick={() => setShowCart(true)}
             onOrderHistoryClick={handleOrderHistoryClick}
-            
           />
-          
+
           <ToastContainer position="top-right" autoClose={3000} />
         </>
       )}
