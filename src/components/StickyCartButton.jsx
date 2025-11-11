@@ -19,7 +19,7 @@ const StickyCartButton = ({ onClick, onOrderHistoryClick, itemCount }) => (
           className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md"
         >
           <Clock className="w-4 h-4" />
-          <span>Orders</span>
+          <span>History</span>
         </button>
         
         {/* View Cart Button */}
@@ -29,7 +29,7 @@ const StickyCartButton = ({ onClick, onOrderHistoryClick, itemCount }) => (
           className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md"
         >
           <ShoppingCart className="w-4 h-4" />
-          <span>View Cart</span>
+          <span>View Order</span>
         </button>
       </div>
     </div>

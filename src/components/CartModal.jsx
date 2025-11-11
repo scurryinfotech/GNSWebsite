@@ -28,8 +28,11 @@ const CartModal = ({
     handlePlaceOrder({ customerName, userPhone });
   };
 
+  // Calculate total amount
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
       <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] sm:max-h-[80vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="p-3 sm:p-4 border-b bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
@@ -64,6 +67,9 @@ const CartModal = ({
                     <p className="text-xs sm:text-sm text-gray-600 capitalize">
                       {item.size} Portion
                     </p>
+                    <p className="text-sm sm:text-base font-semibold text-green-600 mt-1">
+                      ₹{item.price} × {item.quantity} = ₹{item.price * item.quantity}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
@@ -95,8 +101,20 @@ const CartModal = ({
                 </div>
               ))}
 
+              {/* Total Amount */}
+              <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border-2 border-green-300">
+                <div className="flex items-center justify-between">
+                  <span className="text-base sm:text-lg font-bold text-gray-800">
+                    Total Amount:
+                  </span>
+                  <span className="text-lg sm:text-xl font-bold text-green-700">
+                    ₹{totalAmount}
+                  </span>
+                </div>
+              </div>
+
               {/* Table Info */}
-              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2 text-green-700">
                   <MapPin size={16} />
                   <span className="text-sm sm:text-base font-semibold">
@@ -109,18 +127,22 @@ const CartModal = ({
               {showDetails ? (
                 <div className="mt-4 space-y-4">
                   <div>
-                    <label className="text-gray-600 block mb-1">Name</label>
+                    <label className="text-gray-600 block mb-1 text-sm sm:text-base font-medium">
+                      Name
+                    </label>
                     <input
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Enter your name"
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <label className="text-gray-600 block mb-1">Phone</label>
+                    <label className="text-gray-600 block mb-1 text-sm sm:text-base font-medium">
+                      Phone
+                    </label>
                     <input
                       type="tel"
                       value={userPhone}
@@ -130,13 +152,34 @@ const CartModal = ({
                         )
                       }
                       placeholder="Enter your phone number"
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
                     />
+                  </div>
+
+                  {/* Order Summary Before Confirm */}
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                      Order Summary
+                    </h3>
+                    <div className="space-y-1 text-xs sm:text-sm text-gray-600">
+                      <div className="flex justify-between">
+                        <span>Items:</span>
+                        <span>{cart.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Table:</span>
+                        <span>{selectedTable}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-green-700 text-sm sm:text-base pt-2 border-t">
+                        <span>Total:</span>
+                        <span>₹{totalAmount}</span>
+                      </div>
+                    </div>
                   </div>
 
                   <button
                     onClick={handleFinalOrder}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition"
+                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold text-sm sm:text-base shadow-md"
                   >
                     Confirm & Place Order
                   </button>
@@ -148,7 +191,7 @@ const CartModal = ({
                   className={`mt-4 w-full py-3 rounded-lg font-semibold text-sm sm:text-base shadow-md transition-all duration-200 
                     ${
                       selectedTable
-                        ? "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-teal-700 hover:to-teal-800"
+                        ? "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800"
                         : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                 >

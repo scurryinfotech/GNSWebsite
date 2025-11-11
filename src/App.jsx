@@ -12,7 +12,8 @@ import OrderHistory from "./components/OrderHistory";
 import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import HomeDelivery from "./components/HomeDelivery";
+import AuthContainer from './components/auth/AuthContainer';
+
 
 const RestaurantApp = () => {
   const [categories, setCategories] = useState([]);
@@ -25,12 +26,12 @@ const RestaurantApp = () => {
   const [showTableSelection, setShowTableSelection] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [error, setError] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
-  const [showHomeDelivery, setShowHomeDelivery] = useState(false);
-  // const [customerName, setCustomerName] = useState("");
-  // const [userPhone, setUserPhone] = useState("");
 
+
+  
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tableFromURL = queryParams.get("table");
@@ -40,7 +41,7 @@ const RestaurantApp = () => {
   const handlePlaceOrder = async ({ customerName, userPhone }) => {
     try {
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q";
 
       if (!token) {
         toast.error("User not authenticated");
@@ -59,7 +60,9 @@ const RestaurantApp = () => {
           selectedTable,
         userName: 2,
         customerName, // ✅ from user input
-        userPhone, // ✅ from user input
+        userPhone,
+        OrderType: "Offline",
+        Address: null,
         orderItems: cart.map((item) => ({
           price: item.price,
           item_id: parseInt(item.id),
@@ -96,7 +99,7 @@ const RestaurantApp = () => {
     const fetchData = async () => {
       try {
         const token =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q";
 
         const [catRes, subcatRes, itemRes] = await Promise.all([
           axios.get(
@@ -113,10 +116,10 @@ const RestaurantApp = () => {
           ),
         ]);
 
-        // Categories
+       
         setCategories(catRes.data || []);
 
-        // Expand ALL categories by default (keyed by categoryId)
+       
         const initialExpanded = {};
         (catRes.data || []).forEach((cat) => {
           initialExpanded[cat.categoryId] = true;
@@ -162,7 +165,7 @@ const RestaurantApp = () => {
     fetchData();
   }, []);
 
-  // Auto select table from URL
+  
 
   useEffect(() => {
     if (tableFromURL) {
@@ -171,14 +174,14 @@ const RestaurantApp = () => {
     }
   }, [tableFromURL]);
 
-  // categoryId -> categoryName map
+  
   const categoryMap = useMemo(() => {
     const map = {};
     categories.forEach((cat) => (map[cat.categoryId] = cat.categoryName));
     return map;
   }, [categories]);
 
-  // Flatten & filter items once per render
+  
   const filteredFlatItems = useMemo(() => {
     const lowerSearch = searchTerm.trim().toLowerCase();
     let all = [];
@@ -213,7 +216,7 @@ const RestaurantApp = () => {
   }, [subcategories, menuItems, categoryMap, searchTerm]);
   useEffect(() => {
     if (searchTerm.trim()) {
-      // Open all categories (or filter to just the matching one if you want)
+      
       const expanded = {};
       categories.forEach((cat) => {
         expanded[cat.categoryId] = true;
@@ -221,7 +224,7 @@ const RestaurantApp = () => {
       setExpandedCategories(expanded);
     }
   }, [searchTerm, categories]);
-  // Grouped items for MenuList
+  
   const groupedItemsForList = useMemo(() => {
     const grouped = {};
 
@@ -230,14 +233,12 @@ const RestaurantApp = () => {
       filteredFlatItems.forEach((item) => {
         const catName = item.categoryName || "Uncategorized";
         const subName = item.subcategoryName || "Uncategorized";
-
         if (!grouped[catName]) grouped[catName] = {};
         if (!grouped[catName][subName]) grouped[catName][subName] = [];
         grouped[catName][subName].push(item);
       });
 
-      // During search, keep all categories visually expanded
-      // (no state change needed — CategorySection will render regardless)
+      
       return grouped;
     }
 
@@ -323,7 +324,7 @@ const RestaurantApp = () => {
       <Header
         getCartItemCount={getCartItemCount}
         setShowCart={setShowCart}
-        onDeliveryClick={() => setShowHomeDelivery(true)}
+        
       />
 
       {isLoading ? (
@@ -344,9 +345,9 @@ const RestaurantApp = () => {
             <CategoryButtons
               categories={categories}
               toggleCategory={(id) => {
-                // ensure expanded before scroll
+                
                 setExpandedCategories((prev) => ({ ...prev, [id]: true }));
-                // smooth scroll to the section
+                
                 const section = document.getElementById(`menu-category-${id}`);
                 if (section)
                   section.scrollIntoView({
@@ -392,9 +393,13 @@ const RestaurantApp = () => {
             />
           )}
 
-          {showHomeDelivery && (
-            <HomeDelivery onClose={() => setShowHomeDelivery(false)} />
-          )}
+          {/* {showHomeDelivery && (
+             <HomeDelivery 
+    onClose={() => setShowHomeDelivery(false)}
+    user={user}                    // ADD THIS
+    onAuthSuccess={handleAuthSuccess} // ADD THIS
+  />
+          )} */}
 
           {/* ✅ Order History Modal */}
           {showOrderHistory && (
@@ -414,6 +419,8 @@ const RestaurantApp = () => {
           />
 
           <ToastContainer position="top-right" autoClose={3000} />
+
+          {/* <button onClick={handleLogout}>Logout</button> */}
         </>
       )}
     </div>

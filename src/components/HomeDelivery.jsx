@@ -3,8 +3,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { X, MapPin, Phone, User, Clock, Plus, Minus, ShoppingCart } from "lucide-react";
 import axios from "axios";
 import { toast } from 'react-toastify';
+import AuthContainer from './auth/AuthContainer';
 
-const HomeDelivery = ({ onClose }) => {
+const HomeDelivery = ({ onClose,user, onAuthSuccess }) => {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState({});
   const [menuItems, setMenuItems] = useState({});
@@ -13,7 +14,7 @@ const HomeDelivery = ({ onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
 //   const [showCart, setShowCart] = useState(false);
-
+const [showAuth, setShowAuth] = useState(!user);
   // Delivery form state
   const [deliveryForm, setDeliveryForm] = useState({
     customerName: "",
@@ -22,12 +23,15 @@ const HomeDelivery = ({ onClose }) => {
     landmark: "",
     deliveryTime: "30-40 mins"
   });
-
+const handleAuthSuccess = (authData) => {
+  onAuthSuccess(authData);
+  setShowAuth(false); // Hide auth after successful login
+};
   // Fetch menu data from API
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q";
 
         const [catRes, subcatRes, itemRes] = await Promise.all([
           axios.get(
@@ -213,7 +217,7 @@ const HomeDelivery = ({ onClose }) => {
     }
 
     try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzUxMjA5MTg4LCJleHAiOjE3NTg5ODUxODgsImlhdCI6MTc1MTIwOTE4OH0.H2XoHKLvlrM8cpb68ht18K2Mkj6PVnSSd-tM4HmMIfI";
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q";
 
       const orderData = {
         selectedTable: "HOME_DELIVERY",
@@ -286,7 +290,11 @@ const HomeDelivery = ({ onClose }) => {
             <X className="w-6 h-6" />
           </button>
         </div>
-
+        {showAuth ? (   
+          <AuthContainer onAuthSuccess={handleAuthSuccess} />
+      
+      ) : (
+        <>
         <div className="flex flex-1 overflow-hidden">
           {/* Left Panel - Menu */}
           <div className="flex-1 flex flex-col">
@@ -577,6 +585,8 @@ const HomeDelivery = ({ onClose }) => {
             </div>
           </div>
         </div>
+        </>
+      )}
       </div>
     </div>
   );
