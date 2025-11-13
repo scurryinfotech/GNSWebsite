@@ -68,7 +68,7 @@ const CartModal = ({
                       {item.size} Portion
                     </p>
                     <p className="text-sm sm:text-base font-semibold text-green-600 mt-1">
-                      ₹{item.price} × {item.quantity} = ₹{item.price * item.quantity}
+                       ₹{item.price * item.quantity}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">

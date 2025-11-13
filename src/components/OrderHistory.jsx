@@ -48,7 +48,7 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
       const data = response.data || [];
       const ordersArray = Array.isArray(data) ? data : [];
       
-      // Filter orders by table number if specified
+      
       const filteredByTable = actualTableNo 
         ? ordersArray.filter(order => {
             const orderTableNo = order.tableNo || order.TableNo || order.table_no;
@@ -56,18 +56,18 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
           })
         : ordersArray;
       
-      // Check if all orders are completed (status 3)
+      
       const hasCompletedOrders = filteredByTable.some(order => order.orderStatusId === 3);
       const allOrdersCompleted = filteredByTable.length > 0 && 
         filteredByTable.every(order => order.orderStatusId === 3 || order.isActive === 0 || order.isActive === false);
       
-      // Check if completion was within last 1 minute
+      
       let shouldShowThankYou = false;
       if (allOrdersCompleted && hasCompletedOrders) {
         const completedOrders = filteredByTable.filter(order => order.orderStatusId === 3);
         const currentTime = new Date();
         
-        // Check if any completed order was modified within the last 1 minute
+       
         shouldShowThankYou = completedOrders.some(order => {
           const lastModified = order.lastModified || order.LastModified || order.modifiedDate;
           if (lastModified) {
