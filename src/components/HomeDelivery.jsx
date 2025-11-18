@@ -35,15 +35,15 @@ const handleAuthSuccess = (authData) => {
 
         const [catRes, subcatRes, itemRes] = await Promise.all([
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuCategory?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuCategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuItem?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuItem?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
         ]);
@@ -234,7 +234,7 @@ const handleAuthSuccess = (authData) => {
         })),
       };
 
-      await axios.post("http://115.187.17.90:84/api/Order/Post", orderData, {
+      await axios.post("https://localhost:7104/api/Order/Post", orderData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

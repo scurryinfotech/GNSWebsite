@@ -9,6 +9,7 @@ const CartModal = ({
   handlePlaceOrder,
   selectedTable,
   setShowCart,
+  isPlacingOrder
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -51,7 +52,7 @@ const CartModal = ({
         <div className="p-3 sm:p-4">
           {cart.length === 0 ? (
             <p className="text-gray-500 text-center py-8 text-sm sm:text-base">
-              Your cart is empty
+              Your cart is empty.
             </p>
           ) : (
             <>
@@ -68,7 +69,7 @@ const CartModal = ({
                       {item.size} Portion
                     </p>
                     <p className="text-sm sm:text-base font-semibold text-green-600 mt-1">
-                       ₹{item.price * item.quantity}
+                      ₹{item.price * item.quantity}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -179,20 +180,23 @@ const CartModal = ({
 
                   <button
                     onClick={handleFinalOrder}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold text-sm sm:text-base shadow-md"
+                    disabled={isPlacingOrder}
+                    className={`w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg transition font-semibold text-sm sm:text-base shadow-md
+                          ${isPlacingOrder ? "opacity-50 cursor-not-allowed" : "hover:from-green-700 hover:to-green-800"}
+                           `}
                   >
-                    Confirm & Place Order
+                    {isPlacingOrder ? "Placing Order..." : "Confirm & Place Order"}
                   </button>
+
                 </div>
               ) : (
                 <button
                   onClick={() => setShowDetails(true)}
                   disabled={!selectedTable}
                   className={`mt-4 w-full py-3 rounded-lg font-semibold text-sm sm:text-base shadow-md transition-all duration-200 
-                    ${
-                      selectedTable
-                        ? "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800"
-                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    ${selectedTable
+                      ? "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                 >
                   Place Order
