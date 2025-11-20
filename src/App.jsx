@@ -29,9 +29,9 @@ const RestaurantApp = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
 
-  
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tableFromURL = queryParams.get("table");
@@ -39,6 +39,8 @@ const RestaurantApp = () => {
   // ---- Place Order ----
   // -----Toastify is used for better user experience------
   const handlePlaceOrder = async ({ customerName, userPhone }) => {
+
+    if (isPlacingOrder) return;
     try {
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q";
@@ -59,7 +61,7 @@ const RestaurantApp = () => {
           selectedTable.id ||
           selectedTable,
         userName: 2,
-        customerName, // ✅ from user input
+        customerName,
         userPhone,
         OrderType: "Offline",
         Address: null,
@@ -78,7 +80,7 @@ const RestaurantApp = () => {
         },
       });
 
-      toast.success("Order placed successfully!");
+      showOrderSuccessTick();
       setCart([]);
       setShowCart(false);
     } catch (error) {
@@ -93,6 +95,81 @@ const RestaurantApp = () => {
     }
     setShowOrderHistory(true);
   };
+const showOrderSuccessTick = () => {
+  const wrapper = document.createElement("div");
+
+  wrapper.innerHTML = `
+    <div id="order-success-popup"
+      style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: white;
+        padding: 40px 50px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        text-align: center;
+        z-index: 999999;
+        opacity: 0;
+        animation: popupFadeIn 0.3s ease forwards;
+      "
+    >
+      <div 
+        style="
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          background: #teal;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: auto;
+          box-shadow: 0 4px 15px rgba(8, 182, 95, 0.5);
+          animation: scaleUp 0.4s ease-out;
+        "
+      >
+        <span style="font-size: 60px; color: white;">✔</span>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 26px; font-weight: bold; color:#333;">
+        Order Placed Successfully
+      </p>
+      <p style="margin-top: 20px; font-size: 20px; color:#333;">
+        Order will be served  within 10 to 15 minutes.
+        Thank you!
+      </p>
+    </div>
+
+    <style>
+      @keyframes popupFadeIn {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      }
+
+      @keyframes scaleUp {
+        0% { transform: scale(0.3); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes fadeOut {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    </style>
+  `;
+
+  document.body.appendChild(wrapper);
+
+  // remove after 1.5 sec with fade-out animation
+  setTimeout(() => {
+    const popup = document.getElementById("order-success-popup");
+    if (popup) {
+      popup.style.animation = "fadeOut 0.6s ease forwards";
+      setTimeout(() => wrapper.remove(), 300);
+    }
+  }, 10000);
+};
 
   // ---- Fetch Data ----
   useEffect(() => {
@@ -116,10 +193,10 @@ const RestaurantApp = () => {
           ),
         ]);
 
-       
+
         setCategories(catRes.data || []);
 
-       
+
         const initialExpanded = {};
         (catRes.data || []).forEach((cat) => {
           initialExpanded[cat.categoryId] = true;
@@ -165,7 +242,7 @@ const RestaurantApp = () => {
     fetchData();
   }, []);
 
-  
+
 
   useEffect(() => {
     if (tableFromURL) {
@@ -174,14 +251,14 @@ const RestaurantApp = () => {
     }
   }, [tableFromURL]);
 
-  
+
   const categoryMap = useMemo(() => {
     const map = {};
     categories.forEach((cat) => (map[cat.categoryId] = cat.categoryName));
     return map;
   }, [categories]);
 
-  
+
   const filteredFlatItems = useMemo(() => {
     const lowerSearch = searchTerm.trim().toLowerCase();
     let all = [];
@@ -216,7 +293,7 @@ const RestaurantApp = () => {
   }, [subcategories, menuItems, categoryMap, searchTerm]);
   useEffect(() => {
     if (searchTerm.trim()) {
-      
+
       const expanded = {};
       categories.forEach((cat) => {
         expanded[cat.categoryId] = true;
@@ -224,7 +301,7 @@ const RestaurantApp = () => {
       setExpandedCategories(expanded);
     }
   }, [searchTerm, categories]);
-  
+
   const groupedItemsForList = useMemo(() => {
     const grouped = {};
 
@@ -238,7 +315,7 @@ const RestaurantApp = () => {
         grouped[catName][subName].push(item);
       });
 
-      
+
       return grouped;
     }
 
@@ -324,7 +401,7 @@ const RestaurantApp = () => {
       <Header
         getCartItemCount={getCartItemCount}
         setShowCart={setShowCart}
-        
+
       />
 
       {isLoading ? (
@@ -345,9 +422,9 @@ const RestaurantApp = () => {
             <CategoryButtons
               categories={categories}
               toggleCategory={(id) => {
-                
+
                 setExpandedCategories((prev) => ({ ...prev, [id]: true }));
-                
+
                 const section = document.getElementById(`menu-category-${id}`);
                 if (section)
                   section.scrollIntoView({
@@ -374,6 +451,7 @@ const RestaurantApp = () => {
 
           {showCart && (
             <CartModal
+              isPlacingOrder={isPlacingOrder}
               cart={cart}
               getCartTotal={getCartTotal}
               updateCartQuantity={updateCartQuantity}
@@ -381,8 +459,8 @@ const RestaurantApp = () => {
               handlePlaceOrder={handlePlaceOrder}
               selectedTable={selectedTable}
               setShowCart={setShowCart}
-              //   setCustomerName={setCustomerName}
-              // setUserPhone={setUserPhone}
+            //   setCustomerName={setCustomerName}
+            // setUserPhone={setUserPhone}
             />
           )}
 
@@ -407,7 +485,7 @@ const RestaurantApp = () => {
               selectedTable={selectedTable}
               onClose={() => setShowOrderHistory(false)}
               tableNo={selectedTable}
-              // orderId={generatedOrderId}
+            // orderId={generatedOrderId}
             />
           )}
 
@@ -418,7 +496,13 @@ const RestaurantApp = () => {
             onOrderHistoryClick={handleOrderHistoryClick}
           />
 
-          <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer
+            position="center"
+            autoClose={3000}
+            toastClassName="Toastify__toast-container--center"
+          />
+
+
 
           {/* <button onClick={handleLogout}>Logout</button> */}
         </>
