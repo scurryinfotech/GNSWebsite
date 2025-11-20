@@ -36,7 +36,7 @@ const OrderHistory = ({ onClose, selectedTable, tableNo }) => {
       const actualTableNo = getTableNumber();
       
       const response = await axios.get(
-        `https://localhost:7104/api/Order/GetOrder?username=Grill_N_Shakes${actualTableNo ? `&tableNo=${actualTableNo}` : ''}`,
+        `http://115.187.17.90:84/api/Order/GetOrder?username=Grill_N_Shakes${actualTableNo ? `&tableNo=${actualTableNo}` : ''}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
