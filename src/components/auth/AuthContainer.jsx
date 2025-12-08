@@ -20,7 +20,7 @@ const AuthContainer = ({ onAuthSuccess }) => {
     };
 
     const response = await axios.post(
-      'http://115.187.17.90:84:/api/Order/Login',
+      'https://yyadavrrohit-001-site4.rtempurl.com:/api/Order/Login',
       payload
     );
 
@@ -57,7 +57,7 @@ const AuthContainer = ({ onAuthSuccess }) => {
       };
       const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkdyaWxsX05fU2hha2VzIiwibmJmIjoxNzU5MTMyMzY3LCJleHAiOjE3NjY5MDgzNjcsImlhdCI6MTc1OTEzMjM2N30.ko8YPHfApg0uN0k3kUTLcJXpZp-2s-6TiRHpsiab42Q"
       const response = await axios.post(
-        'http://115.187.17.90:84/api/Order/AddUser',
+        'https://yyadavrrohit-001-site4.rtempurl.com/api/Order/AddUser',
         payload,
         {
         headers: {

@@ -137,12 +137,12 @@ const showOrderSuccessTick = () => {
       popup.style.animation = "fadeOut 0.6s ease forwards";
       setTimeout(() => wrapper.remove(), 600);
     }
-  }, 10000);
+  }, 3000);
 };
 
   // ---- Place Order ----
   // -----Toastify is used for better user experience------
-  const handlePlaceOrder = async ({ customerName, userPhone }) => {
+  const handlePlaceOrder = async ({ customerName, userPhone,instructions }) => {
 
     if (isPlacingOrder) return;
     try {
@@ -168,6 +168,7 @@ const showOrderSuccessTick = () => {
         customerName,
         userPhone,
         OrderType: "Offline",
+        specialInstruction: instructions || "No Instrtuctions",
         Address: null,
         orderItems: cart.map((item) => ({
           price: item.price,
@@ -177,7 +178,7 @@ const showOrderSuccessTick = () => {
         })),
       };
 
-      await axios.post("http://115.187.17.90:84/api/Order/Post", orderData, {
+      await axios.post("https://yyadavrrohit-001-site4.rtempurl.com/api/Order/Post", orderData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -210,15 +211,15 @@ const showOrderSuccessTick = () => {
 
         const [catRes, subcatRes, itemRes] = await Promise.all([
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuCategory?username=Grill_N_Shakes",
+            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuCategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
+            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "http://115.187.17.90:84/api/Order/GetMenuItem?username=Grill_N_Shakes",
+            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuItem?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
         ]);

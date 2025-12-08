@@ -14,7 +14,7 @@ const CartModal = ({
   const [showDetails, setShowDetails] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [userPhone, setUserPhone] = useState("");
-
+  const [instructions, setInstructions] = useState("");
   const handleFinalOrder = () => {
     if (!customerName.trim()) {
       toast.error("Please enter your name");
@@ -26,7 +26,7 @@ const CartModal = ({
     }
 
     // ✅ Pass details to API function
-    handlePlaceOrder({ customerName, userPhone });
+    handlePlaceOrder({ customerName, userPhone,instructions });
   };
 
   // Calculate total amount
@@ -154,6 +154,20 @@ const CartModal = ({
                       }
                       placeholder="Enter your phone number"
                       className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
+                    />
+                  </div>
+
+                {/* Special Instructions */}
+                  <div>
+                    <label className="text-gray-600 block mb-1">
+                      Special Instructions
+                    </label>
+                    <textarea
+                      value={instructions}
+                      onChange={(e) => setInstructions(e.target.value)}
+                      placeholder="E.g. No onion, call on arrival"
+                      rows="2"
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
                     />
                   </div>
 
