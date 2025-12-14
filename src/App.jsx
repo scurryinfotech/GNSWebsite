@@ -26,19 +26,18 @@ const RestaurantApp = () => {
   const [showTableSelection, setShowTableSelection] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [error, setError] = useState(null);
-
   const [isLoading, setIsLoading] = useState(true);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-
+  const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tableFromURL = queryParams.get("table");
-const showOrderSuccessTick = () => {
-  const wrapper = document.createElement("div");
+  const showOrderSuccessTick = () => {
+    const wrapper = document.createElement("div");
 
-  wrapper.innerHTML = `
+    wrapper.innerHTML = `
     <div id="order-success-popup"
       style="
         position: fixed;
@@ -128,21 +127,38 @@ const showOrderSuccessTick = () => {
     </style>
   `;
 
-  document.body.appendChild(wrapper);
+    document.body.appendChild(wrapper);
 
-  // remove after 10 sec
-  setTimeout(() => {
-    const popup = document.getElementById("order-success-popup");
-    if (popup) {
-      popup.style.animation = "fadeOut 0.6s ease forwards";
-      setTimeout(() => wrapper.remove(), 600);
+    // remove after 10 sec
+    setTimeout(() => {
+      const popup = document.getElementById("order-success-popup");
+      if (popup) {
+        popup.style.animation = "fadeOut 0.6s ease forwards";
+        setTimeout(() => wrapper.remove(), 600);
+      }
+    }, 3000);
+  };
+  // ---- Restaurant Open/Close Status ----
+  useEffect(() => {
+    fetchRestaurantStatus();
+    const fetchInterval = setInterval(fetchRestaurantStatus, 3000);
+    return () => clearInterval(fetchInterval);
+  }, []);
+
+  const fetchRestaurantStatus = async () => {
+    try {
+      const response = await axios.get(
+        "https://localhost:7104/api/Order/GetAvailabilityOnline"
+      );
+      setIsRestaurantOpen(response.data);
+    } catch (error) {
+      console.error("Failed to fetch restaurant status", error);
     }
-  }, 3000);
-};
+  };
 
   // ---- Place Order ----
   // -----Toastify is used for better user experience------
-  const handlePlaceOrder = async ({ customerName, userPhone,instructions }) => {
+  const handlePlaceOrder = async ({ customerName, userPhone, instructions }) => {
 
     if (isPlacingOrder) return;
     try {
@@ -178,7 +194,7 @@ const showOrderSuccessTick = () => {
         })),
       };
 
-      await axios.post("https://yyadavrrohit-001-site4.rtempurl.com/api/Order/Post", orderData, {
+      await axios.post("https://localhost:7104/api/Order/Post", orderData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -211,15 +227,15 @@ const showOrderSuccessTick = () => {
 
         const [catRes, subcatRes, itemRes] = await Promise.all([
           axios.get(
-            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuCategory?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuCategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuSubcategory?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
           axios.get(
-            "https://yyadavrrohit-001-site4.rtempurl.com/api/Order/GetMenuItem?username=Grill_N_Shakes",
+            "https://localhost:7104/api/Order/GetMenuItem?username=Grill_N_Shakes",
             { headers: { Authorization: `Bearer ${token}` } }
           ),
         ]);
@@ -252,7 +268,7 @@ const showOrderSuccessTick = () => {
           groupedItemsBySubcategory[subId].push({
             ...item,
             id: item.itemId,
-            name: item.itemName, // ✅ always set name for search
+            name: item.itemName, 
             imageData:
               item.imageSrc && item.imageSrc.length > 50 ? item.imageSrc : null,
             prices: {
@@ -435,7 +451,51 @@ const showOrderSuccessTick = () => {
 
       />
 
-      {isLoading ? (
+      {!isRestaurantOpen ? (
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-md w-full">
+            {/* Icon */}
+            <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6 sm:mb-8 animate-pulse">
+              <svg
+                className="w-10 h-10 sm:w-12 sm:h-12 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600 mb-4 sm:mb-6">
+              Restaurant Closed
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 leading-relaxed">
+              Online ordering is currently unavailable.
+            </p>
+
+            {/* Additional Info */}
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 border border-gray-100">
+              <p className="text-gray-700 text-sm sm:text-base mb-3">
+                We'll be back soon! Check our opening hours:
+              </p>
+              <div className="space-y-2 text-sm sm:text-base">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Monday - Sunday</span>
+                  <span className="font-semibold text-gray-800">11:00 AM - 11:00 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : isLoading ? (
         <Loader />
       ) : error ? (
         <div className="text-black-500 text-center mt-10">
