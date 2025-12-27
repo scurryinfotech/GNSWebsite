@@ -18,13 +18,10 @@ const MenuItems = ({
       <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shadow-md flex-shrink-0">
         {item.imageData ? (
          <img
-            src={item.imagePath}
-            alt={item.itemName}
+            src={`data:image/jpeg;base64,${item.imageData}`}
+            alt={item.name}
             className={`w-full h-full object-cover ${!isAvailable ? 'opacity-50' : ''}`}
             loading="lazy"
-            onError={(e) => {
-              e.currentTarget.src = "";
-            }}
           />
         ) : (
           <span className="text-2xl">🍽️</span>
